@@ -14,6 +14,39 @@ Python 3.10+, asyncio, plain TCP. Only extra dependency: `matplotlib` (graphs).
 | `demo_web.py`, `web/` | Browser demo ("Loss bench"): runs the real broker and proxy and shows delivery under loss live |
 | `tests/` | Unit tests (wildcards) and end-to-end tests (QoS 1 under loss) |
 
+
+## Architecture and Message Flow
+
+The system follows a Publish-Subscribe messaging architecture consisting of three main components: publishers, subscribers, and a central broker.
+
+### System Components
+
+1. **Publisher:** Sends messages to the broker under a specified topic.
+2. **Broker:** Receives published messages, matches topics against active subscriptions, and forwards messages to the relevant subscribers.
+3. **Subscriber:** Registers interest in specific topics and receives matching messages from the broker.
+4. **Lossy Proxy:** Simulates network-level application message loss by dropping selected PUBLISH and PUBACK frames.
+5. **Monitoring and Benchmarking:** Collects performance statistics and generates graphs to evaluate message delivery under different loss conditions.
+
+### Message Communication Flow
+
+1. The client establishes a TCP connection with the broker.
+2. The client sends a CONNECT request and receives CONNACK.
+3. Subscribers register their topics using SUBSCRIBE.
+4. The broker confirms successful subscription using SUBACK.
+5. Publishers send messages using PUBLISH.
+6. The broker matches message topics with subscriber filters.
+7. Matching messages are forwarded to subscribers.
+8. Under QoS 1, acknowledgements and retransmissions help ensure at-least-once delivery.
+9. The system records delivery statistics for performance analysis.
+
+### Reliability Testing
+
+The lossy proxy is used to evaluate how the messaging system behaves when application-level message frames are dropped.
+
+The benchmark evaluates message delivery, retransmissions, duplicate publications, and delivery failures under different loss conditions.
+
+This helps demonstrate the difference between basic QoS 0 delivery and QoS 1 delivery with acknowledgement and retransmission mechanisms.
+
 ## Run
 
 ```bash
